@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bgApi" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040810"/>
+      <stop offset="50%" stop-color="#0a1524"/>
+      <stop offset="100%" stop-color="#140d08"/>
+    </linearGradient>
+    <linearGradient id="claudeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E07A5F"/>
+      <stop offset="100%" stop-color="#C45D40"/>
+    </linearGradient>
+    <linearGradient id="openAIGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10A37F"/>
+      <stop offset="100%" stop-color="#00664F"/>
+    </linearGradient>
+    <radialGradient id="apiGlow" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#E07A5F" stop-opacity="0.38"/>
+      <stop offset="60%" stop-color="#0a1524" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#040810" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#bgApi)"/>
+  <circle cx="400" cy="165" r="280" fill="url(#apiGlow)"/>
+
+  <!-- High-tech backdrop grid -->
+  <g opacity="0.06" stroke="#ffffff" stroke-width="1.5">
+    <line x1="0" y1="80" x2="800" y2="80"/>
+    <line x1="0" y1="200" x2="800" y2="200"/>
+    <line x1="0" y1="320" x2="800" y2="320"/>
+    <line x1="160" y1="0" x2="160" y2="450"/>
+    <line x1="400" y1="0" x2="400" y2="450"/>
+    <line x1="640" y1="0" x2="640" y2="450"/>
+  </g>
+
+  <!-- Terminal Window Silhouette -->
+  <g stroke="#ffffff" stroke-opacity="0.1" stroke-width="1.5" fill="none">
+    <rect x="180" y="60" width="440" height="190" rx="14"/>
+    <circle cx="205" cy="80" r="4.5" fill="#FF5F56"/>
+    <circle cx="220" cy="80" r="4.5" fill="#FFBD2E"/>
+    <circle cx="235" cy="80" r="4.5" fill="#27C93F"/>
+  </g>
+
+  <!-- Dual Emblems: Claude & OpenAI -->
+  <g transform="translate(400, 155)">
+    <g transform="translate(-50, 0) scale(0.95)">
+      <circle cx="0" cy="0" r="42" fill="#1b1216" stroke="#E07A5F" stroke-width="2" filter="drop-shadow(0 0 20px rgba(224,122,95,0.65))"/>
+      <path d="M 0,-26 L 6,-9 L 24,-15 L 13,0 L 26,11 L 8,11 L 9,28 L -4,13 L -19,24 L -13,7 L -28,-2 L -11,-7 Z" fill="url(#claudeGrad)"/>
+      <circle cx="0" cy="0" r="7" fill="#ffffff"/>
+    </g>
+
+    <path d="M -8,0 L 8,0" stroke="#00FFA3" stroke-width="3" stroke-dasharray="3,3"/>
+
+    <g transform="translate(50, 0) scale(0.95)">
+      <circle cx="0" cy="0" r="42" fill="#081816" stroke="#10A37F" stroke-width="2" filter="drop-shadow(0 0 20px rgba(16,163,127,0.65))"/>
+      <path d="M 0,-20 A 20,20 0 0,1 17,-10 L 8,-5 A 10,10 0 0,0 0,-10 Z" fill="#10A37F"/>
+      <path d="M 17,-10 A 20,20 0 0,1 17,10 L 8,5 A 10,10 0 0,0 8,-5 Z" fill="#10A37F"/>
+      <path d="M 17,10 A 20,20 0 0,1 0,20 L 0,10 A 10,10 0 0,0 8,5 Z" fill="#10A37F"/>
+      <path d="M 0,20 A 20,20 0 0,1 -17,10 L -8,5 A 10,10 0 0,0 0,10 Z" fill="#10A37F"/>
+      <path d="M -17,10 A 20,20 0 0,1 -17,-10 L -8,-5 A 10,10 0 0,0 -8,5 Z" fill="#10A37F"/>
+      <path d="M -17,-10 A 20,20 0 0,1 0,-20 L 0,-10 A 10,10 0 0,0 -8,-5 Z" fill="#10A37F"/>
+      <circle cx="0" cy="0" r="6" fill="#ffffff"/>
+    </g>
+  </g>
+
+  <!-- Top Badge -->
+  <g transform="translate(295, 26)">
+    <rect width="210" height="30" rx="15" fill="#E07A5F" fill-opacity="0.25" stroke="#E07A5F" stroke-width="1.5"/>
+    <text x="105" y="20" font-family="system-ui, sans-serif" font-size="11" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1.5">
+      ★ 2026 FRONTIER DEV API ★
+    </text>
+  </g>
+
+  <!-- Spec Pill -->
+  <g transform="translate(400, 268)" opacity="0.95">
+    <rect x="-150" y="-14" width="300" height="28" rx="14" fill="#241410" stroke="#E07A5F" stroke-width="1.5"/>
+    <text x="0" y="5" font-family="system-ui, sans-serif" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle" letter-spacing="1">
+      ⚡ 10M - 50M TOKENS • CURSOR &amp; CLINE
+    </text>
+  </g>
+
+  <!-- Title Text -->
+  <text x="400" y="336" font-family="system-ui, sans-serif" font-size="25" font-weight="900" fill="#ffffff" text-anchor="middle" letter-spacing="1.5">
+    CLAUDE 5.5 &amp; GPT-6 ASTRA / SOL
+  </text>
+  <text x="400" y="365" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#E07A5F" text-anchor="middle" letter-spacing="1.5">
+    CLAUDE OPUS/SONNET 5.5 • GPT-6.1 SOL • DEEPSEEK-V4.1 • VIỆT NAM GATEWAY
+  </text>
+</svg>

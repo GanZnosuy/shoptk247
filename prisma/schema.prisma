@@ -1,0 +1,183 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 1. Người dùng & Số dư ví
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String?       // Mật khẩu đã hash hoặc null nếu Google Login
+  name         String?
+  avatar       String?
+  role         String        @default("USER") // "USER" hoặc "ADMIN"
+  balance      Float         @default(0) // Số dư ví (VND)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  orders       Order[]
+  transactions Transaction[]
+}
+
+// 2. Danh mục sản phẩm
+model Category {
+  id          String    @id @default(cuid())
+  name        String    // VD: AI & Công nghệ, Giải trí & Phim ảnh, v.v.
+  slug        String    @unique
+  icon        String    // Lucide icon name (vd: Sparkles, Film, ShieldCheck...)
+  description String?
+  orderIndex  Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  products    Product[]
+}
+
+// 3. Sản phẩm
+model Product {
+  id             String         @id @default(cuid())
+  categoryId     String
+  category       Category       @relation(fields: [categoryId], references: [id])
+  title          String         // Tên sản phẩm
+  slug           String         @unique
+  thumbnail      String         // URL ảnh đại diện
+  deliveryType   String         @default("AUTO_ACCOUNT") // "AUTO_ACCOUNT", "AUTO_KEY", "AUTO_PROXY", "MANUAL_UPGRADE", "DOWNLOAD_LINK"
+  shortDesc      String         // Mô tả tóm tắt
+  description    String         // Mô tả chi tiết tính năng
+  warrantyPolicy String?        // Chính sách bảo hành
+  usageGuide     String?        // Hướng dẫn sử dụng
+  badge          String?        // Huy hiệu (VD: "HOT", "BÁN CHẠY", "GIÁ TỐT")
+  isFeatured     Boolean        @default(false)
+  isActive       Boolean        @default(true)
+  viewCount      Int            @default(0)
+  soldCount      Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  variants       ProductVariant[]
+}
+
+// 4. Các gói / Biến thể thời hạn của sản phẩm
+model ProductVariant {
+  id               String      @id @default(cuid())
+  productId        String
+  product          Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name             String      // VD: "Gói 1 Tháng (Slot riêng)", "Gói 1 Năm"
+  durationDays     Int         @default(30)
+  price            Float       // Giá bán trên web cho khách (VND)
+  originalPrice    Float?      // Giá gốc niêm yết
+  orderIndex       Int         @default(0)
+  isActive         Boolean     @default(true)
+
+  // Liên kết nguồn hàng Telegram Bot Sỉ 3rd-Party Dropship
+  sourceType       String      @default("MANUAL_STOCK") // "MANUAL_STOCK" (kho web), "TELEGRAM_BOT" (tự động chuyển lệnh sang bot sỉ), "MANUAL_ORDER" (admin làm tay)
+  costPrice        Float?      // Giá vốn mua từ Bot Telegram (VND)
+  teleBotTarget    String?     // Username của Bot Telegram nguồn (VD: "@SupplierAccBot")
+  teleBotCommand   String?     // Lệnh gửi tới bot nguồn (VD: "/buy netflix_1m" hoặc mã SKU)
+  teleBotRegex     String?     // Cấu hình quy tắc trích xuất tài khoản từ tin nhắn bot
+
+  stockItems       StockItem[]
+  orderItems       OrderItem[]
+}
+
+// 5. Kho hàng tự động (Lưu trữ User/Pass, Key, Proxy)
+model StockItem {
+  id         String         @id @default(cuid())
+  variantId  String
+  variant    ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  data       String         // "user|pass" hoặc "license-key" hoặc "ip:port:user:pass"
+  isSold     Boolean        @default(false)
+  soldAt     DateTime?
+  orderId    String?
+  createdAt  DateTime       @default(now())
+
+  @@index([variantId, isSold])
+  @@unique([variantId, data]) // Chống nhập trùng cùng 1 tài khoản vào cùng 1 gói
+}
+
+// 6. Đơn hàng
+model Order {
+  id            String       @id @default(cuid())
+  orderCode     String       @unique // VD: "ORD-9821"
+  userId        String?
+  user          User?        @relation(fields: [userId], references: [id])
+  customerEmail String       // Email nhận thông tin đơn hàng
+  customerPhone String?
+  totalAmount   Float
+  status        String       @default("PENDING") // "PENDING", "PARTIALLY_PAID", "PAID", "PROCESSING_DROPSHIP", "COMPLETED", "REFUNDED_TIMEOUT", "CANCELLED"
+  paymentMethod String       @default("VIETQR") // "VIETQR", "WALLET"
+  customerNote  String?      // Email cần nâng cấp hoặc ghi chú của khách
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  items         OrderItem[]
+  transactions  Transaction[]
+  teleLogs      TelegramOrderLog[]
+}
+
+// 7. Chi tiết từng món trong đơn hàng
+model OrderItem {
+  id            String         @id @default(cuid())
+  orderId       String
+  order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId     String
+  variant       ProductVariant @relation(fields: [variantId], references: [id])
+  quantity      Int            @default(1)
+  unitPrice     Float
+  totalPrice    Float
+  deliveredData String?        // Dữ liệu tài khoản đã xuất cho đơn hàng này
+}
+
+// 8. Lịch sử giao dịch & Nạp tiền VietQR
+model Transaction {
+  id          String    @id @default(cuid())
+  transCode   String    @unique // Mã nội dung chuyển khoản: VD: "DH9821" hoặc "NAP5543"
+  bankTransId String?   @unique // Mã FT ngân hàng / SePAY referenceCode (chống replay attack)
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
+  orderId     String?
+  order       Order?    @relation(fields: [orderId], references: [id])
+  amount      Float
+  amountPaid  Float?    // Số tiền thực tế ngân hàng ghi có
+  type        String    // "DIRECT_ORDER", "DEPOSIT_WALLET", "WALLET_PAYMENT"
+  status      String    @default("PENDING") // "PENDING", "SUCCESS", "FAILED", "PARTIAL_PAID"
+  qrUrl       String?   // URL ảnh QR động
+  paymentGate String    @default("VIETQR") // "VIETQR", "WALLET"
+  bankCode    String?   // MB, VCB, ICB, etc.
+  paidAt      DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+// 9. Lịch sử chuyển lệnh sang Bot Telegram sỉ 3rd-Party (Dropship Log)
+model TelegramOrderLog {
+  id               String    @id @default(cuid())
+  orderId          String
+  order            Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  botUsername      String    // Bot sỉ được chuyển lệnh đến (VD: "@SupplierAccBot")
+  commandSent      String    // Lệnh gửi đi (VD: "/buy netflix_1m")
+  botReply         String?   // Toàn bộ tin nhắn bot nguồn phản hồi
+  accountExtracted String?   // Tài khoản regex trích xuất được
+  costPrice        Float?    // Giá vốn bị trừ bên Bot Telegram sỉ
+  sellingPrice     Float?    // Giá bán trên web để tính lãi ròng O(1)
+  status           String    @default("PENDING") // "PENDING", "SUCCESS", "FAILED", "TIMEOUT", "OUT_OF_STOCK"
+  errorMessage     String?
+  createdAt        DateTime  @default(now())
+
+  @@index([orderId])
+  @@index([status, createdAt])
+}
+
+// 10. Cấu hình Hệ thống & Kết nối
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique // VD: "TELEGRAM_USERBOT_SESSION", "PAYMENT_WEBHOOK_SECRET", "SEPAY_API_KEY"
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+}
